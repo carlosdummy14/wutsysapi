@@ -1,7 +1,7 @@
 const express = require('express')
-require('dotenv').config()
 const morgan = require('morgan')
 const { connectDB } = require('./db/connect')
+require('dotenv').config()
 
 const firstRoute = require('./routes/first.route')
 const employeeRoute = require('./routes/employee.route')
@@ -19,7 +19,7 @@ app.use('/api/v1/employee', employeeRoute)
 
 const start = async () => {
   try {
-    await connectDB()
+    await connectDB(process.env.DB_URI)
     app.listen(PORT, () => {
       console.log(`Listener on http://localhost:${PORT} ...`)
     })
