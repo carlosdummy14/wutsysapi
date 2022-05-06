@@ -3,8 +3,8 @@ const morgan = require('morgan')
 const { connectDB } = require('./db/connect')
 require('dotenv').config()
 
-const firstRoute = require('./routes/first.route')
 const employeeRoute = require('./routes/employee.route')
+const assetRoute = require('./routes/asset.route')
 
 const PORT = process.env.PORT || 3000
 
@@ -14,8 +14,8 @@ app.use(express.json())
 app.use(morgan('dev'))
 
 // Routes
-app.use('/api/v1/first', firstRoute)
 app.use('/api/v1/employee', employeeRoute)
+app.use('/api/v1/asset', assetRoute)
 
 const start = async () => {
   try {
