@@ -1,15 +1,19 @@
 const { Router } = require('express')
 const {
-  getAll,
-  createOne,
-  getOne,
-  updateOne,
-  deleteOne,
+  getAllEmployees,
+  createEmployee,
+  getEmployee,
+  updateEmployee,
+  deleteEmployee,
 } = require('../controllers/employee.controller')
 
 const router = Router()
 
-router.route('/').get(getAll).post(createOne)
-router.route('/:id').get(getOne).patch(updateOne).delete(deleteOne)
+router.route('/').get(getAllEmployees).post(createEmployee)
+router
+  .route('/:id')
+  .get(getEmployee)
+  .patch(updateEmployee)
+  .delete(deleteEmployee)
 
 module.exports = router

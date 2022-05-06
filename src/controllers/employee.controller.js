@@ -3,7 +3,7 @@ const Employee = require('../models/employee.model')
 const DEFAULT_AVATAR =
   'https://www.gravatar.com/avatar/c21f969b5f03d33d43e04f8f136e7682?d=robohash&s=200'
 
-const getAll = async (req, res) => {
+const getAllEmployees = async (req, res) => {
   try {
     const employees = await Employee.find({})
 
@@ -15,29 +15,29 @@ const getAll = async (req, res) => {
   }
 }
 
-const createOne = async (req, res) => {
-  const { internalId, name, position, area, avatar } = req.body
-
-  if (!internalId || !name || !position || !area) {
-    res.status(400).json({ msg: 'Please provide a valid employee' })
-    return
-  }
-
-  const existEmployee = await Employee.findOne({ internalId })
-  if (existEmployee) {
-    res.status(400).json({ msg: 'Employee already exist' })
-    return
-  }
-
-  const data = {
-    internalId,
-    name,
-    position,
-    area,
-    avatar: avatar || DEFAULT_AVATAR,
-  }
-
+const createEmployee = async (req, res) => {
   try {
+    const { internalId, name, position, area, avatar } = req.body
+
+    if (!internalId || !name || !position || !area) {
+      res.status(400).json({ msg: 'Please provide a valid employee' })
+      return
+    }
+
+    const existEmployee = await Employee.findOne({ internalId })
+    if (existEmployee) {
+      res.status(400).json({ msg: 'Employee already exist' })
+      return
+    }
+
+    const data = {
+      internalId,
+      name,
+      position,
+      area,
+      avatar: avatar || DEFAULT_AVATAR,
+    }
+
     const newEmployee = await Employee.create(data)
     res.status(201).json({ msg: 'employee created', data: newEmployee })
   } catch (error) {
@@ -45,18 +45,18 @@ const createOne = async (req, res) => {
   }
 }
 
-const getOne = async (req, res) => {
-  const { id: employeeId } = req.params
-
-  if (!employeeId) {
-    res.status(400).json({ msg: 'Provide a valid employee' })
-    return
-  }
-
+const getEmployee = async (req, res) => {
   try {
-    const employee = await Employee.findById(employeeId)
+    const { id: employeeId } = req.params
+
+    if (!employeeId) {
+      res.status(400).json({ msg: 'Provide a valid employee' })
+      return
+    }
+
+    const employee = await Employee.findOne({ _id: employeeId })
     if (!employee) {
-      res.status(400).json({ msg: 'Employee did not exist' })
+      res.status(404).json({ msg: 'Employee did not exist' })
       return
     }
 
@@ -66,19 +66,19 @@ const getOne = async (req, res) => {
   }
 }
 
-const updateOne = async (req, res) => {
-  const { name, position, area, avatar } = req.body
-  const { id: employeeId } = req.params
-
-  if (!employeeId || !name || !position || !area) {
-    res.status(400).json({ msg: 'Please provide a valid employee' })
-    return
-  }
-
+const updateEmployee = async (req, res) => {
   try {
-    const employeeToUpdate = await Employee.findById(employeeId)
+    const { name, position, area, avatar } = req.body
+    const { id: employeeId } = req.params
+
+    if (!employeeId || !name || !position || !area) {
+      res.status(400).json({ msg: 'Please provide a valid employee' })
+      return
+    }
+
+    const employeeToUpdate = await Employee.findOne({ _id: employeeId })
     if (!employeeToUpdate) {
-      res.status(400).json({ msg: 'Employee did not exist' })
+      res.status(404).json({ msg: 'Employee did not exist' })
       return
     }
 
@@ -87,23 +87,23 @@ const updateOne = async (req, res) => {
     employeeToUpdate.area = area
     employeeToUpdate.avatar = avatar || DEFAULT_AVATAR
 
-    await employeeToUpdate.save()
+    await employeeToUpdate.save({ validateBeforeSave: true })
     res.status(200).json({ msg: 'employee updated', data: employeeToUpdate })
   } catch (error) {
     res.status(500).json({ msg: error })
   }
 }
 
-const deleteOne = async (req, res) => {
-  const { id: employeeId } = req.params
-
-  if (!employeeId) {
-    res.status(403).json({ msg: 'Provide a valid employee' })
-    return
-  }
-
+const deleteEmployee = async (req, res) => {
   try {
-    const employeeToDelete = await Employee.findById(employeeId)
+    const { id: employeeId } = req.params
+
+    if (!employeeId) {
+      res.status(403).json({ msg: 'Provide a valid employee' })
+      return
+    }
+
+    const employeeToDelete = await Employee.findOne({ _id: employeeId })
     if (!employeeToDelete) {
       res.status(403).json({ msg: 'Employee did not exist' })
       return
@@ -117,4 +117,10 @@ const deleteOne = async (req, res) => {
   }
 }
 
-module.exports = { getAll, createOne, getOne, updateOne, deleteOne }
+module.exports = {
+  getAllEmployees,
+  createEmployee,
+  getEmployee,
+  updateEmployee,
+  deleteEmployee,
+}
