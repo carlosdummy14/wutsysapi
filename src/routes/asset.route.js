@@ -5,7 +5,7 @@ const {
   getAsset,
   updateAsset,
   deleteAsset,
-} = require('../controllers/equip.controller')
+} = require('../controllers/asset.controller')
 
 const router = Router()
 
