@@ -30,12 +30,16 @@ const createEmployee = async (req, res) => {
       return
     }
 
+    const newAvatar = `https://robohash.org/${name
+      .replace(/[^a-zA-Z]/g, '')
+      .toLowerCase()}.png?size=100x100&set=set1`
+
     const data = {
       internalId,
       name,
       position,
       area,
-      avatar: avatar || DEFAULT_AVATAR,
+      avatar: avatar || newAvatar,
     }
 
     const newEmployee = await Employee.create(data)
