@@ -13,12 +13,12 @@ const createEmployee = asyncWrapper(async (req, res, next) => {
   const { internalId, name, position, area, avatar } = req.body
 
   if (!internalId || !name || !position || !area) {
-    next(customError('Please provide a valid employee', 400))
+    return next(customError('Please provide a valid employee', 400))
   }
 
   const existEmployee = await Employee.findOne({ internalId })
   if (existEmployee) {
-    next(customError('Employee already exist', 400))
+    return next(customError('Employee already exist', 400))
   }
 
   const data = {
@@ -36,13 +36,9 @@ const createEmployee = asyncWrapper(async (req, res, next) => {
 const getEmployee = asyncWrapper(async (req, res, next) => {
   const { id: employeeId } = req.params
 
-  if (!employeeId) {
-    next(customError('Provide a valid employee', 400))
-  }
-
   const employee = await Employee.findOne({ _id: employeeId })
   if (!employee) {
-    next(customError('Employee did not exist', 404))
+    return next(customError('Employee did not exist', 404))
   }
 
   res.status(200).json({ msg: 'ok', data: employee })
@@ -52,13 +48,13 @@ const updateEmployee = asyncWrapper(async (req, res, next) => {
   const { name, position, area, avatar } = req.body
   const { id: employeeId } = req.params
 
-  if (!employeeId || !name || !position || !area) {
-    next(customError('Please provide a valid employee', 400))
+  if (!name || !position || !area) {
+    return next(customError('Please provide a valid employee', 400))
   }
 
   const employeeToUpdate = await Employee.findOne({ _id: employeeId })
   if (!employeeToUpdate) {
-    next(customError('Employee did not exist', 404))
+    return next(customError('Employee did not exist', 404))
   }
 
   employeeToUpdate.name = name
@@ -73,13 +69,9 @@ const updateEmployee = asyncWrapper(async (req, res, next) => {
 const deleteEmployee = asyncWrapper(async (req, res, next) => {
   const { id: employeeId } = req.params
 
-  if (!employeeId) {
-    next(customError('Provide a valid employee', 403))
-  }
-
   const employeeToDelete = await Employee.findOne({ _id: employeeId })
   if (!employeeToDelete) {
-    next(customError('Employee did not exist', 403))
+    return next(customError('Employee did not exist', 403))
   }
 
   await employeeToDelete.remove()
