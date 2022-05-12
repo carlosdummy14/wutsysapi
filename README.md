@@ -5,13 +5,15 @@ This is the API to use with WUTsys app.
 - [x] Connect DB
 - [x] Employee endpoint
 - [x] Asset endpoint
-- [x] Not found
-- [x] Asyncwrapper
+- [x] Not Found
+- [x] AsyncWrapper
 - [ ] Manage errors
-  - [] Custom error
+  - [x] Custom error
 
 ---
 
 - [ ] Link Employee vs Asset
 - [ ] Auth
+- [ ] Utils
+  - [x] Create Avatar
 - [ ] .

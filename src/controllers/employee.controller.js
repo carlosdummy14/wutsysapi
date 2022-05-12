@@ -1,9 +1,7 @@
 const { customError } = require('../errors/customError')
 const asyncWrapper = require('../middleware/asyncWrapper')
+const createAvatar = require('../utils/createAvatar')
 const Employee = require('../models/employee.model')
-
-const DEFAULT_AVATAR =
-  'https://www.gravatar.com/avatar/c21f969b5f03d33d43e04f8f136e7682?d=robohash&s=200'
 
 const getAllEmployees = asyncWrapper(async (req, res) => {
   const employees = await Employee.find({})
@@ -23,16 +21,12 @@ const createEmployee = asyncWrapper(async (req, res, next) => {
     next(customError('Employee already exist', 400))
   }
 
-  const newAvatar = `https://robohash.org/${name
-    .replace(/[^a-zA-Z]/g, '')
-    .toLowerCase()}.png?size=100x100&set=set1`
-
   const data = {
     internalId,
     name,
     position,
     area,
-    avatar: avatar || newAvatar,
+    avatar: avatar || createAvatar(name),
   }
 
   const newEmployee = await Employee.create(data)
@@ -70,7 +64,7 @@ const updateEmployee = asyncWrapper(async (req, res, next) => {
   employeeToUpdate.name = name
   employeeToUpdate.position = position
   employeeToUpdate.area = area
-  employeeToUpdate.avatar = avatar || DEFAULT_AVATAR
+  employeeToUpdate.avatar = avatar || createAvatar(name)
 
   await employeeToUpdate.save({ validateBeforeSave: true })
   res.status(200).json({ msg: 'employee updated', data: employeeToUpdate })
