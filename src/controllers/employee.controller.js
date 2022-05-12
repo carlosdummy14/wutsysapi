@@ -1,3 +1,4 @@
+const { customError } = require('../errors/customError')
 const asyncWrapper = require('../middleware/asyncWrapper')
 const Employee = require('../models/employee.model')
 
@@ -7,23 +8,19 @@ const DEFAULT_AVATAR =
 const getAllEmployees = asyncWrapper(async (req, res) => {
   const employees = await Employee.find({})
 
-  res
-    .status(200)
-    .json({ msg: 'employees', data: employees, count: employees.length })
+  res.status(200).json({ msg: 'employees', data: employees, count: employees.length })
 })
 
-const createEmployee = asyncWrapper(async (req, res) => {
+const createEmployee = asyncWrapper(async (req, res, next) => {
   const { internalId, name, position, area, avatar } = req.body
 
   if (!internalId || !name || !position || !area) {
-    res.status(400).json({ msg: 'Please provide a valid employee' })
-    return
+    next(customError('Please provide a valid employee', 400))
   }
 
   const existEmployee = await Employee.findOne({ internalId })
   if (existEmployee) {
-    res.status(400).json({ msg: 'Employee already exist' })
-    return
+    next(customError('Employee already exist', 400))
   }
 
   const newAvatar = `https://robohash.org/${name
@@ -42,36 +39,32 @@ const createEmployee = asyncWrapper(async (req, res) => {
   res.status(201).json({ msg: 'employee created', data: newEmployee })
 })
 
-const getEmployee = asyncWrapper(async (req, res) => {
+const getEmployee = asyncWrapper(async (req, res, next) => {
   const { id: employeeId } = req.params
 
   if (!employeeId) {
-    res.status(400).json({ msg: 'Provide a valid employee' })
-    return
+    next(customError('Provide a valid employee', 400))
   }
 
   const employee = await Employee.findOne({ _id: employeeId })
   if (!employee) {
-    res.status(404).json({ msg: 'Employee did not exist' })
-    return
+    next(customError('Employee did not exist', 404))
   }
 
   res.status(200).json({ msg: 'ok', data: employee })
 })
 
-const updateEmployee = asyncWrapper(async (req, res) => {
+const updateEmployee = asyncWrapper(async (req, res, next) => {
   const { name, position, area, avatar } = req.body
   const { id: employeeId } = req.params
 
   if (!employeeId || !name || !position || !area) {
-    res.status(400).json({ msg: 'Please provide a valid employee' })
-    return
+    next(customError('Please provide a valid employee', 400))
   }
 
   const employeeToUpdate = await Employee.findOne({ _id: employeeId })
   if (!employeeToUpdate) {
-    res.status(404).json({ msg: 'Employee did not exist' })
-    return
+    next(customError('Employee did not exist', 404))
   }
 
   employeeToUpdate.name = name
@@ -83,23 +76,21 @@ const updateEmployee = asyncWrapper(async (req, res) => {
   res.status(200).json({ msg: 'employee updated', data: employeeToUpdate })
 })
 
-const deleteEmployee = asyncWrapper(async (req, res) => {
+const deleteEmployee = asyncWrapper(async (req, res, next) => {
   const { id: employeeId } = req.params
 
   if (!employeeId) {
-    res.status(403).json({ msg: 'Provide a valid employee' })
-    return
+    next(customError('Provide a valid employee', 403))
   }
 
   const employeeToDelete = await Employee.findOne({ _id: employeeId })
   if (!employeeToDelete) {
-    res.status(403).json({ msg: 'Employee did not exist' })
-    return
+    next(customError('Employee did not exist', 403))
   }
 
   await employeeToDelete.remove()
 
-  res.status(200).json({ msg: 'deleted' })
+  res.status(200).json({ msg: 'employee deleted' })
 })
 
 module.exports = {
