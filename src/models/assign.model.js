@@ -2,7 +2,7 @@ const { Schema, model } = require('mongoose')
 
 const SingleAssetSchema = new Schema({
   asset: {
-    type: Schema.Types.ObjectId,
+    type: Schema.ObjectId,
     ref: 'Asset',
     required: true,
   },
@@ -10,14 +10,12 @@ const SingleAssetSchema = new Schema({
   serial: { type: String },
 })
 
-SingleAssetSchema.path('asset')
-
 const AssignSchema = new Schema(
   {
     employee: {
-      type: Schema.Types.ObjectId,
-      required: true,
+      type: Schema.ObjectId,
       ref: 'Employee',
+      required: true,
     },
     assets: [SingleAssetSchema],
   },

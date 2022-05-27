@@ -1,4 +1,4 @@
-const { customError } = require('../errors/customError')
+const { BadRequestError, NotFoundError } = require('../errors')
 const Assign = require('../models/assign.model')
 const Employee = require('../models/employee.model')
 const Asset = require('../models/asset.model')
@@ -14,27 +14,29 @@ const createAssign = asyncWrapper(async (req, res, next) => {
   const { employee: employeeId, assets } = req.body
 
   if (!employeeId || !assets || assets.length === 0) {
-    return next(customError('Please provide a valid assign', 400))
+    throw new BadRequestError('Please provide a valid assign')
   }
 
   const employeeToAssign = await Employee.findOne({ _id: employeeId })
   if (!employeeToAssign) {
-    return next(customError('Employee did not exist', 400))
+    throw new NotFoundError(`Employee with id:${employeeId} not exist`)
   }
 
   let assetsToAssign = []
   for (const assetId of assets) {
     const validAsset = await Asset.findOne({ _id: assetId })
     if (!validAsset) {
-      return next(customError('Asset did not exist', 400))
+      throw new NotFoundError(`Asset with id:${assetId} not exist`)
     }
     if (validAsset.assigned) {
-      return next(customError('Asset already assigned', 400))
+      throw new BadRequestError(`Asset with id:${assetId} already assigned`)
     }
+
+    const { genericName: name, serialNumber: serial, _id } = validAsset
     const assetToAssign = {
-      asset: validAsset._id,
-      name: validAsset.genericName,
-      serial: validAsset.serialNumber,
+      asset: _id,
+      name,
+      serial,
     }
     assetsToAssign = [...assetsToAssign, assetToAssign]
   }
@@ -44,8 +46,8 @@ const createAssign = asyncWrapper(async (req, res, next) => {
     assets: assetsToAssign,
   }
 
-  const newAssign = await Assign.create(data)
-  res.status(201).json({ msg: 'assign created', data: newAssign })
+  const assign = await Assign.create(data)
+  res.status(201).json({ msg: 'assign created', data: assign })
 })
 
 const getAssign = asyncWrapper(async (req, res, next) => {
@@ -53,7 +55,7 @@ const getAssign = asyncWrapper(async (req, res, next) => {
 
   const assign = await Assign.findOne({ _id: assignId })
   if (!assign) {
-    return next(customError('Assign did not exist', 404))
+    throw new NotFoundError(`Assign with id:${assignId} not exist`)
   }
 
   res.status(200).json({ msg: 'ok', data: assign })
@@ -64,12 +66,12 @@ const updateAssign = asyncWrapper(async (req, res, next) => {
   const { id: assignId } = req.params
 
   if (!internalId || !genericName || !brand || !serialNumber || !type) {
-    return next(customError('Please provide a valid assign', 400))
+    throw new BadRequestError('Please provide a valid assign')
   }
 
   const assignToUpdate = await Assign.findOne({ _id: assignId })
   if (!assignToUpdate) {
-    return next(customError('Assign did not exist', 404))
+    throw new NotFoundError(`Assign with id:${assignId}, not exist`)
   }
 
   assignToUpdate.internalId = internalId
@@ -89,7 +91,7 @@ const deleteAssign = asyncWrapper(async (req, res, next) => {
 
   const assignToDelete = await Assign.findOne({ _id: assignId })
   if (!assignToDelete) {
-    return next(customError('Assign did not exist', 404))
+    throw new NotFoundError(`Assign with id:${assignId}, not exist`)
   }
 
   await assignToDelete.remove()

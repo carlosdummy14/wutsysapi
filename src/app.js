@@ -22,8 +22,8 @@ app.use(morgan('dev'))
 app.use('/api/v1/employee', employeeRoute)
 app.use('/api/v1/asset', assetRoute)
 app.use('/api/v1/assign', assignRoute)
-app.use(errorHandler)
 app.use(notFound)
+app.use(errorHandler)
 
 const start = async () => {
   try {

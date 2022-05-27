@@ -1,4 +1,4 @@
-const { customError } = require('../errors/customError')
+const { BadRequestError, NotFoundError } = require('../errors')
 const asyncWrapper = require('../middleware/asyncWrapper')
 const createAvatar = require('../utils/createAvatar')
 const Employee = require('../models/employee.model')
@@ -13,12 +13,12 @@ const createEmployee = asyncWrapper(async (req, res, next) => {
   const { internalId, name, position, area, avatar } = req.body
 
   if (!internalId || !name || !position || !area) {
-    return next(customError('Please provide a valid employee', 400))
+    throw new BadRequestError('Please provide a valid employee')
   }
 
   const existEmployee = await Employee.findOne({ internalId })
   if (existEmployee) {
-    return next(customError('Employee already exist', 400))
+    throw new BadRequestError('Employee already exist')
   }
 
   const data = {
@@ -38,7 +38,7 @@ const getEmployee = asyncWrapper(async (req, res, next) => {
 
   const employee = await Employee.findOne({ _id: employeeId })
   if (!employee) {
-    return next(customError('Employee did not exist', 404))
+    throw new NotFoundError(`Employee with id:${employeeId} not exist`)
   }
 
   res.status(200).json({ msg: 'ok', data: employee })
@@ -49,12 +49,12 @@ const updateEmployee = asyncWrapper(async (req, res, next) => {
   const { id: employeeId } = req.params
 
   if (!name || !position || !area) {
-    return next(customError('Please provide a valid employee', 400))
+    throw new BadRequestError('Please provide a valid employee')
   }
 
   const employeeToUpdate = await Employee.findOne({ _id: employeeId })
   if (!employeeToUpdate) {
-    return next(customError('Employee did not exist', 404))
+    throw new NotFoundError(`Employee with id:${employeeId} not exist`)
   }
 
   employeeToUpdate.name = name
@@ -71,7 +71,7 @@ const deleteEmployee = asyncWrapper(async (req, res, next) => {
 
   const employeeToDelete = await Employee.findOne({ _id: employeeId })
   if (!employeeToDelete) {
-    return next(customError('Employee did not exist', 403))
+    throw new NotFoundError(`Employee with id:${employeeId} not exist`)
   }
 
   await employeeToDelete.remove()

@@ -1,4 +1,4 @@
-const { customError } = require('../errors/customError')
+const { BadRequestError, NotFoundError } = require('../errors')
 const Asset = require('../models/asset.model')
 const asyncWrapper = require('../middleware/asyncWrapper')
 
@@ -12,12 +12,12 @@ const createAsset = asyncWrapper(async (req, res, next) => {
   const { internalId, genericName, brand, model, serialNumber, type, comments } = req.body
 
   if (!internalId || !genericName || !brand || !serialNumber || !type) {
-    return next(customError('Please provide a valid asset', 400))
+    throw new BadRequestError('Please provide a valid asset')
   }
 
   const existAsset = await Asset.findOne({ $or: [{ internalId }, { serialNumber }] })
   if (existAsset) {
-    return next(customError('Asset already exist', 400))
+    throw BadRequestError('Asset already exist')
   }
 
   const data = {
@@ -39,7 +39,7 @@ const getAsset = asyncWrapper(async (req, res, next) => {
 
   const asset = await Asset.findOne({ _id: assetId })
   if (!asset) {
-    return next(customError('Asset did not exist', 404))
+    throw new NotFoundError(`Asset with id:${assetId} not exist`)
   }
 
   res.status(200).json({ msg: 'ok', data: asset })
@@ -50,12 +50,12 @@ const updateAsset = asyncWrapper(async (req, res, next) => {
   const { id: assetId } = req.params
 
   if (!internalId || !genericName || !brand || !serialNumber || !type) {
-    return next(customError('Please provide a valid asset', 400))
+    throw new BadRequestError('Please provide a valid asset')
   }
 
   const assetToUpdate = await Asset.findOne({ _id: assetId })
   if (!assetToUpdate) {
-    return next(customError('Asset did not exist', 404))
+    throw new NotFoundError(`Asset with id:${assetId} not exist`)
   }
 
   assetToUpdate.internalId = internalId
@@ -75,7 +75,7 @@ const deleteAsset = asyncWrapper(async (req, res, next) => {
 
   const assetToDelete = await Asset.findOne({ _id: assetId })
   if (!assetToDelete) {
-    return next(customError('Asset did not exist', 404))
+    throw new NotFoundError(`Asset with id:${assetId} not exist`)
   }
 
   await assetToDelete.remove()
