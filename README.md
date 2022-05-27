@@ -9,6 +9,7 @@ This is the API to use with WUTsys app.
 - [x] AsyncWrapper
 - [ ] Manage errors
   - [x] Custom error
+- [ ] Assign assets endpoint
 
 ---
 
