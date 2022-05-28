@@ -1,4 +1,5 @@
 const { BadRequestError, NotFoundError } = require('../errors')
+const { StatusCodes } = require('http-status-codes')
 const asyncWrapper = require('../middleware/asyncWrapper')
 const createAvatar = require('../utils/createAvatar')
 const Employee = require('../models/employee.model')
@@ -6,7 +7,7 @@ const Employee = require('../models/employee.model')
 const getAllEmployees = asyncWrapper(async (req, res) => {
   const employees = await Employee.find({})
 
-  res.status(200).json({ msg: 'employees', data: employees, count: employees.length })
+  res.status(StatusCodes.OK).json({ msg: 'employees', data: employees, count: employees.length })
 })
 
 const createEmployee = asyncWrapper(async (req, res, next) => {
@@ -30,7 +31,7 @@ const createEmployee = asyncWrapper(async (req, res, next) => {
   }
 
   const newEmployee = await Employee.create(data)
-  res.status(201).json({ msg: 'employee created', data: newEmployee })
+  res.status(StatusCodes.CREATED).json({ msg: 'employee created', data: newEmployee })
 })
 
 const getEmployee = asyncWrapper(async (req, res, next) => {
@@ -41,7 +42,7 @@ const getEmployee = asyncWrapper(async (req, res, next) => {
     throw new NotFoundError(`Employee with id:${employeeId} not exist`)
   }
 
-  res.status(200).json({ msg: 'ok', data: employee })
+  res.status(StatusCodes.OK).json({ msg: 'ok', data: employee })
 })
 
 const updateEmployee = asyncWrapper(async (req, res, next) => {
@@ -63,7 +64,7 @@ const updateEmployee = asyncWrapper(async (req, res, next) => {
   employeeToUpdate.avatar = avatar || createAvatar(name)
 
   await employeeToUpdate.save({ validateBeforeSave: true })
-  res.status(200).json({ msg: 'employee updated', data: employeeToUpdate })
+  res.status(StatusCodes.OK).json({ msg: 'employee updated', data: employeeToUpdate })
 })
 
 const deleteEmployee = asyncWrapper(async (req, res, next) => {
@@ -76,7 +77,7 @@ const deleteEmployee = asyncWrapper(async (req, res, next) => {
 
   await employeeToDelete.remove()
 
-  res.status(200).json({ msg: 'employee deleted' })
+  res.status(StatusCodes.OK).json({ msg: 'employee deleted' })
 })
 
 module.exports = {

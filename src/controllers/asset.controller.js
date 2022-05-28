@@ -1,11 +1,12 @@
 const { BadRequestError, NotFoundError } = require('../errors')
+const { StatusCodes } = require('http-status-codes')
 const Asset = require('../models/asset.model')
 const asyncWrapper = require('../middleware/asyncWrapper')
 
 const getAllAssets = asyncWrapper(async (req, res) => {
   const assets = await Asset.find({})
 
-  res.status(200).json({ msg: 'assets', data: assets, count: assets.length })
+  res.status(StatusCodes.OK).json({ msg: 'assets', data: assets, count: assets.length })
 })
 
 const createAsset = asyncWrapper(async (req, res, next) => {
@@ -31,7 +32,7 @@ const createAsset = asyncWrapper(async (req, res, next) => {
   }
 
   const newAsset = await Asset.create(data)
-  res.status(201).json({ msg: 'asset created', data: newAsset })
+  res.status(StatusCodes.CREATED).json({ msg: 'asset created', data: newAsset })
 })
 
 const getAsset = asyncWrapper(async (req, res, next) => {
@@ -42,7 +43,7 @@ const getAsset = asyncWrapper(async (req, res, next) => {
     throw new NotFoundError(`Asset with id:${assetId} not exist`)
   }
 
-  res.status(200).json({ msg: 'ok', data: asset })
+  res.status(StatusCodes.OK).json({ msg: 'ok', data: asset })
 })
 
 const updateAsset = asyncWrapper(async (req, res, next) => {
@@ -67,7 +68,7 @@ const updateAsset = asyncWrapper(async (req, res, next) => {
   assetToUpdate.comments = comments
 
   await assetToUpdate.save({ validateBeforeSave: true })
-  res.status(200).json({ msg: 'asset updated', data: assetToUpdate })
+  res.status(StatusCodes.OK).json({ msg: 'asset updated', data: assetToUpdate })
 })
 
 const deleteAsset = asyncWrapper(async (req, res, next) => {
@@ -80,7 +81,7 @@ const deleteAsset = asyncWrapper(async (req, res, next) => {
 
   await assetToDelete.remove()
 
-  res.status(200).json({ msg: 'deleted' })
+  res.status(StatusCodes.OK).json({ msg: 'deleted' })
 })
 
 module.exports = {
