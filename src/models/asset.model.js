@@ -44,6 +44,10 @@ const AssetSchema = new Schema(
       trim: true,
       maxlength: [100, 'comments too large max size 100'],
     },
+    assigned: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
