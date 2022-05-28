@@ -1,13 +1,14 @@
 const { BadRequestError, NotFoundError } = require('../errors')
-const Assign = require('../models/assign.model')
-const Employee = require('../models/employee.model')
+const { StatusCodes } = require('http-status-codes')
 const Asset = require('../models/asset.model')
+const Assign = require('../models/assign.model')
 const asyncWrapper = require('../middleware/asyncWrapper')
+const Employee = require('../models/employee.model')
 
 const getAllAssigns = asyncWrapper(async (req, res) => {
-  const assigns = await Assign.find({})
+  const assigns = await Assign.find({}).populate(['employee', 'assets.asset'])
 
-  res.status(200).json({ msg: 'assigns', data: assigns, count: assigns.length })
+  res.status(StatusCodes.OK).json({ msg: 'assigns', data: assigns, count: assigns.length })
 })
 
 const createAssign = asyncWrapper(async (req, res, next) => {
@@ -32,12 +33,8 @@ const createAssign = asyncWrapper(async (req, res, next) => {
       throw new BadRequestError(`Asset with id:${assetId} already assigned`)
     }
 
-    const { genericName: name, serialNumber: serial, _id } = validAsset
-    const assetToAssign = {
-      asset: _id,
-      name,
-      serial,
-    }
+    const assetToAssign = { asset: validAsset._id }
+
     assetsToAssign = [...assetsToAssign, assetToAssign]
   }
 
@@ -47,7 +44,7 @@ const createAssign = asyncWrapper(async (req, res, next) => {
   }
 
   const assign = await Assign.create(data)
-  res.status(201).json({ msg: 'assign created', data: assign })
+  res.status(StatusCodes.CREATED).json({ msg: 'assign created', data: assign })
 })
 
 const getAssign = asyncWrapper(async (req, res, next) => {
@@ -58,7 +55,23 @@ const getAssign = asyncWrapper(async (req, res, next) => {
     throw new NotFoundError(`Assign with id:${assignId} not exist`)
   }
 
-  res.status(200).json({ msg: 'ok', data: assign })
+  res.status(StatusCodes.OK).json({ msg: 'ok', data: assign })
+})
+
+const getEmployeeAssign = asyncWrapper(async (req, res, next) => {
+  const { employee: employeeId } = req.body
+
+  const validEmployee = await Employee.findOne({ employee: employeeId })
+  if (!validEmployee) {
+    throw new NotFoundError(`Employee with id:${employeeId} not exist`)
+  }
+
+  const assign = await Assign.findOne({ employee: employeeId }).populate('assets.asset')
+  if (!assign) {
+    return res.status(StatusCodes.OK).json({ msg: 'ok', data: {} })
+  }
+
+  res.status(StatusCodes.OK).json({ msg: 'ok', data: assign })
 })
 
 const updateAssign = asyncWrapper(async (req, res, next) => {
@@ -83,7 +96,7 @@ const updateAssign = asyncWrapper(async (req, res, next) => {
   assignToUpdate.comments = comments
 
   await assignToUpdate.save({ validateBeforeSave: true })
-  res.status(200).json({ msg: 'assign updated', data: assignToUpdate })
+  res.status(StatusCodes.OK).json({ msg: 'assign updated', data: assignToUpdate })
 })
 
 const deleteAssign = asyncWrapper(async (req, res, next) => {
@@ -96,7 +109,7 @@ const deleteAssign = asyncWrapper(async (req, res, next) => {
 
   await assignToDelete.remove()
 
-  res.status(200).json({ msg: 'deleted' })
+  res.status(StatusCodes.OK).json({ msg: 'deleted' })
 })
 
 module.exports = {
@@ -105,4 +118,5 @@ module.exports = {
   getAssign,
   updateAssign,
   deleteAssign,
+  getEmployeeAssign,
 }

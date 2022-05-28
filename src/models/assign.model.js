@@ -6,8 +6,6 @@ const SingleAssetSchema = new Schema({
     ref: 'Asset',
     required: true,
   },
-  name: { type: String },
-  serial: { type: String },
 })
 
 const AssignSchema = new Schema(
@@ -24,4 +22,5 @@ const AssignSchema = new Schema(
   }
 )
 
+// TODO: set to assets assigned=true/false
 module.exports = model('Assign', AssignSchema)
