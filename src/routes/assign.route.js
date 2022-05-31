@@ -11,7 +11,7 @@ const {
 const router = Router()
 
 router.route('/').get(getAllAssigns).post(createAssign)
-router.route('/employeeassign').get(getEmployeeAssign)
+router.route('/employeeassign/:id').get(getEmployeeAssign)
 router.route('/:id').get(getAssign).patch(updateAssign).delete(deleteAssign)
 
 module.exports = router
