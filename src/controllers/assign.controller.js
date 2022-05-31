@@ -59,16 +59,22 @@ const getAssign = asyncWrapper(async (req, res, next) => {
 })
 
 const getEmployeeAssign = asyncWrapper(async (req, res, next) => {
-  const { employee: employeeId } = req.body
+  const { id: employeeId } = req.params
 
-  const validEmployee = await Employee.findOne({ employee: employeeId })
+  const validEmployee = await Employee.findOne({ _id: employeeId })
   if (!validEmployee) {
     throw new NotFoundError(`Employee with id:${employeeId} not exist`)
   }
 
-  const assign = await Assign.findOne({ employee: employeeId }).populate('assets.asset')
+  const assign = await Assign.findOne({ employee: employeeId }).populate('employee assets.asset')
   if (!assign) {
-    return res.status(StatusCodes.OK).json({ msg: 'ok', data: {} })
+    return res.status(StatusCodes.OK).json({
+      msg: 'ok',
+      data: {
+        employee: validEmployee,
+        assets: [],
+      },
+    })
   }
 
   res.status(StatusCodes.OK).json({ msg: 'ok', data: assign })
